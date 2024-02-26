@@ -3,6 +3,15 @@
     <title>resolver</title>
   </head>
   <body>
-    <h3> I am resolver</h3>
+    <script>
+      async function fetchAsync (url) {
+        let response = await fetch(url);
+        let data = await response.json();
+        return data;
+      }
+      var domain = "goole.com";
+      var url = 'https://dns.google/resolve?name='+domain+'&type=a&do=1';
+      var data = await fetchAsync(url)
+    </script>
   </body>
 </html>
