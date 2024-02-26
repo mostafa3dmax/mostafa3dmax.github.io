@@ -1,19 +1,22 @@
 <html>
   <head>
     <title>resolver</title>
-  </head>
-  <body>
-    <script>
-      async function fetchAsync (url) {
-        let response = await fetch(url);
-        let data = await response.json();
-        return data;
-      }
-      var domain = "goole.com";
-      var url = 'https://dns.google/resolve?name='+domain+'&type=a&do=1';
-      var data = await fetchAsync(url);
-      document.write(data);
-      document.write("hello");
+	<script type="text/javascript" lang="ja">
+     function start(){
+		function httpGet(theUrl){
+			var xmlHttp = new XMLHttpRequest();
+			xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+			xmlHttp.send( null );
+			return xmlHttp.responseText;
+		}
+		var domain = "goole.com";
+		var url = 'https://dns.google/resolve?name='+domain+'&type=a&do=1';
+		var data = httpGet(url)
+		document.getElementById('bb').innerHTML = data;
+     }
     </script>
+  </head>
+  <body id ="bb" onload="start()">
+ 
   </body>
 </html>
