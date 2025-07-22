@@ -2,111 +2,141 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8">
-  <title>ارسال تیکت</title>
+  <title>ارسال درخواست</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: sans-serif;
       direction: rtl;
-      padding: 20px;
-      max-width: 500px;
-      margin: auto;
+      font-family: 'Tahoma', sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
     }
+
+    .container {
+      max-width: 500px;
+      margin: 50px auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
     label {
       display: block;
-      margin: 10px 0 5px;
+      margin-bottom: 5px;
+      font-weight: bold;
     }
-    input, textarea, button {
+
+    input[type="text"],
+    textarea {
       width: 100%;
       padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
       margin-bottom: 15px;
-      font-size: 1em;
       box-sizing: border-box;
+      font-family: inherit;
     }
-    #loader {
-      display: none;
-      text-align: center;
-      margin-bottom: 15px;
+
+    button {
+      background-color: #007BFF;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
     }
+
+    button:disabled {
+      background-color: #aaa;
+      cursor: wait;
+    }
+
     .alert {
-      padding: 10px;
-      margin-top: 10px;
-      display: none;
-      border-radius: 5px;
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 6px;
+      font-weight: bold;
     }
-    .alert.success { background: #d4edda; color: #155724; }
-    .alert.error   { background: #f8d7da; color: #721c24; }
+
+    .alert.success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .alert.error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h2>ارسال درخواست</h2>
+    <form id="supportForm">
+      <label for="username">نام کاربری</label>
+      <input type="text" id="username" name="username" required>
 
-  <h2>ارسال تیکت پشتیبانی</h2>
+      <label for="telegram_id">آی‌دی تلگرام</label>
+      <input type="text" id="telegram_id" name="telegram_id" required>
 
-  <form id="ticketForm">
-    <label for="username">نام کاربری</label>
-    <input type="text" id="username" name="username" required>
+      <label for="text">توضیحات</label>
+      <textarea id="text" name="text" rows="5" required></textarea>
 
-    <label for="telegram_id">آی‌دی تلگرام</label>
-    <input type="text" id="telegram_id" name="telegram_id" required>
+      <button type="submit" id="submitBtn">ارسال</button>
+    </form>
 
-    <label for="text">توضیحات</label>
-    <textarea id="text" name="text" rows="4" required></textarea>
-
-    <div id="loader">در حال ارسال...</div>
-
-    <button type="submit" id="submitBtn">ارسال</button>
-  </form>
-
-  <div id="alertSuccess" class="alert success">درخواست شما با موفقیت ارسال شد.</div>
-  <div id="alertError" class="alert error">خطایی رخ داده است، لطفاً بعداً تلاش کنید.</div>
+    <div id="alertContainer"></div>
+  </div>
 
   <script>
-    document.getElementById("ticketForm").addEventListener("submit", function(e) {
+    const form = document.getElementById('supportForm');
+    const btn = document.getElementById('submitBtn');
+    const alertContainer = document.getElementById('alertContainer');
+
+    form.addEventListener('submit', function (e) {
       e.preventDefault();
+      btn.disabled = true;
+      btn.innerText = 'در حال ارسال...';
+      alertContainer.innerHTML = '';
 
-      const submitBtn = document.getElementById("submitBtn");
-      const loader = document.getElementById("loader");
-      const alertSuccess = document.getElementById("alertSuccess");
-      const alertError = document.getElementById("alertError");
-
-      // پاک‌کردن پیام‌ها
-      alertSuccess.style.display = "none";
-      alertError.style.display = "none";
-
-      // گرفتن داده‌ها
       const data = {
-        username: document.getElementById("username").value,
-        telegram_id: document.getElementById("telegram_id").value,
-        text: document.getElementById("text").value
+        username: form.username.value,
+        telegram_id: form.telegram_id.value,
+        text: form.text.value
       };
 
-      // غیرفعال‌کردن دکمه و نمایش لودینگ
-      submitBtn.disabled = true;
-      loader.style.display = "block";
-
-      fetch("https://sh3.goolha.tk/support/ticket/", {
-        method: "POST",
+      fetch('https://sh3.goolha.tk/support/ticket/', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json"
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
-      }).then(res => {
-        submitBtn.disabled = false;
-        loader.style.display = "none";
+      })
+        .then(response => {
+          btn.disabled = false;
+          btn.innerText = 'ارسال';
 
-        if (res.ok) {
-          alertSuccess.style.display = "block";
-          document.getElementById("ticketForm").reset();
-        } else {
-          alertError.style.display = "block";
-        }
-      }).catch(() => {
-        submitBtn.disabled = false;
-        loader.style.display = "none";
-        alertError.style.display = "block";
-      });
+          if (response.ok) {
+            showAlert('درخواست شما با موفقیت ارسال شد.', 'success');
+            form.reset();
+          } else {
+            showAlert('خطایی رخ داده است، لطفاً بعداً تلاش کنید.', 'error');
+          }
+        })
+        .catch(error => {
+          btn.disabled = false;
+          btn.innerText = 'ارسال';
+          showAlert('خطایی در اتصال به سرور رخ داده است.', 'error');
+        });
     });
-  </script>
 
+    function showAlert(message, type) {
+      alertContainer.innerHTML = `<div class="alert ${type}">${message}</div>`;
+    }
+  </script>
 </body>
 </html>
