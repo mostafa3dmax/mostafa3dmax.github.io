@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>ارسال تیکت</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      direction: rtl;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+    #loader {
+      display: none;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    .alert {
+      padding: 10px;
+      margin-top: 10px;
+      display: none;
+      border-radius: 5px;
+    }
+    .alert.success { background: #d4edda; color: #155724; }
+    .alert.error   { background: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+
+  <h2>ارسال تیکت پشتیبانی</h2>
+
+  <form id="ticketForm">
+    <label for="username">نام کاربری</label>
+    <input type="text" id="username" name="username" required>
+
+    <label for="telegram_id">آی‌دی تلگرام</label>
+    <input type="text" id="telegram_id" name="telegram_id" required>
+
+    <label for="text">توضیحات</label>
+    <textarea id="text" name="text" rows="4" required></textarea>
+
+    <div id="loader">در حال ارسال...</div>
+
+    <button type="submit" id="submitBtn">ارسال</button>
+  </form>
+
+  <div id="alertSuccess" class="alert success">درخواست شما با موفقیت ارسال شد.</div>
+  <div id="alertError" class="alert error">خطایی رخ داده است، لطفاً بعداً تلاش کنید.</div>
+
+  <script>
+    document.getElementById("ticketForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const submitBtn = document.getElementById("submitBtn");
+      const loader = document.getElementById("loader");
+      const alertSuccess = document.getElementById("alertSuccess");
+      const alertError = document.getElementById("alertError");
+
+      // پاک‌کردن پیام‌ها
+      alertSuccess.style.display = "none";
+      alertError.style.display = "none";
+
+      // گرفتن داده‌ها
+      const data = {
+        username: document.getElementById("username").value,
+        telegram_id: document.getElementById("telegram_id").value,
+        text: document.getElementById("text").value
+      };
+
+      // غیرفعال‌کردن دکمه و نمایش لودینگ
+      submitBtn.disabled = true;
+      loader.style.display = "block";
+
+      fetch("https://sh3.goolha.tk/support/ticket", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      }).then(res => {
+        submitBtn.disabled = false;
+        loader.style.display = "none";
+
+        if (res.ok) {
+          alertSuccess.style.display = "block";
+          document.getElementById("ticketForm").reset();
+        } else {
+          alertError.style.display = "block";
+        }
+      }).catch(() => {
+        submitBtn.disabled = false;
+        loader.style.display = "none";
+        alertError.style.display = "block";
+      });
+    });
+  </script>
+
+</body>
+</html>
